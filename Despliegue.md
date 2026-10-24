@@ -22,12 +22,14 @@ En [portal.azure.com](https://portal.azure.com) busca **"Static Web Apps"** → 
 
 | Campo | Qué pusimos | Por qué |
 |---|---|---|
-| Suscripción | La activa de la cuenta | Es la que paga (o el crédito gratis). |
+| Suscripción | **Azure for Students** | Es la que sale con el correo institucional; trae crédito gratis. |
 | Grupo de recursos | `rg-pueblopaletainc-prod` | La "carpeta" del proyecto, fácil de borrar al final. Nombre: `rg` (resource group) + proyecto + ambiente `prod`. |
 | Nombre | `swa-pokedex-portal-prod` | `swa` = *Static Web App*, `pokedex-portal` = qué es, `prod` = ambiente. Mismo estilo de nombres que el grupo de recursos. |
 | Tipo de plan | **Gratuito (Free)** | Alcanza de sobra para un proyecto de la uni. |
-| Región | La más cercana disponible | Menos latencia. En el plan gratis la app igual se sirve globalmente. |
+| Región | **Global** (el formulario no deja escoger una) | Static Web Apps distribuye los archivos por todo el mundo, así que no hay que elegir región. |
 | Origen del despliegue | **GitHub** | Para que se actualice solo con cada `push`. |
+
+![Paso 1: datos básicos del Static Web App](docs/img/04-azure-crear-swa-datos-basicos.png)
 
 ## Paso 2: Conectar GitHub
 
@@ -38,6 +40,10 @@ Azure te pide **iniciar sesión con GitHub** y autorizar. Después eliges:
 - **Rama:** `main`
 
 **Decisión:** rama `main` porque es la principal; así lo que esté ahí es lo que se publica.
+
+En esta misma pantalla están los detalles de compilación del Paso 3 (abajo):
+
+![Pasos 2 y 3: conexión con GitHub y detalles de compilación](docs/img/05-azure-github-y-compilacion.png)
 
 ## Paso 3: Detalles de compilación
 
@@ -61,6 +67,20 @@ Le das a **Revisar y crear** → **Crear**. Azure:
 3. Lanza el primer build.
 
 Puedes ver el avance en la pestaña **Actions** del repo en GitHub.
+
+Pantalla de revisión antes de dar **Crear**:
+
+![Paso 4: revisar y crear](docs/img/06-azure-revisar-y-crear.png)
+
+Cuando termina, el recurso queda **Listo** en el portal, con la URL pública de la app:
+
+![Recurso creado en el portal de Azure](docs/img/07-azure-recurso-creado.png)
+
+Y en GitHub, pestaña **Actions**, se ven las ejecuciones. Las de **Azure Static Web Apps CI/CD** (las que despliegan) salen en verde:
+
+![Ejecuciones en GitHub Actions](docs/img/08-github-actions-ejecuciones.png)
+
+> ⚠️ Fíjate que también hay ejecuciones en rojo llamadas **Run test-coverage**. Esas son del workflow `pipelines.yml` que ya venía en el proyecto original (corre pruebas y sube cobertura a Codecov). Fallan, probablemente porque falta el secreto `CODECOV_TOKEN` del autor original, y **no afectan el despliegue**: Azure se publica con su propio workflow.
 
 ## Paso 5: Ajustes para que Angular funcione bien en Azure
 
