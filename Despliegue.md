@@ -131,6 +131,10 @@ Cambiamos `environment.prod.ts` porque es el archivo que Angular usa cuando comp
 
 **Después del cambio:** hacer `git commit` y `git push` a `main` para que GitHub Actions vuelva a compilar y Azure publique la versión corregida. Luego recargar la página con `Ctrl + F5` (para saltarse la caché) y comprobar que las imágenes cargan.
 
+**Resultado:** ya cargan los sprites de los Pokémon en el listado (versión Green), y la barra de abajo muestra que los links usan la URL de Azure sin `/pokedex-angular/`:
+
+![App funcionando en Azure con las imágenes cargando](docs/img/09-app-funcionando.png)
+
 ## Paso 6: Probar
 
 En el portal, dentro del recurso, aparece la **URL** (algo como `https://xxxx.azurestaticapps.net`). Ábrela y revisa:
@@ -138,6 +142,8 @@ En el portal, dentro del recurso, aparece la **URL** (algo como `https://xxxx.az
 - Carga el listado de Pokémon.
 - Entra al detalle de uno.
 - Recarga en el detalle y no sale 404.
+
+Así se ve la app ya publicada en `https://delightful-hill-0f1051410.5.azurestaticapps.net/` (ver captura de arriba en el Reto 1: `docs/img/09-app-funcionando.png`).
 
 ## Cómo se actualiza después
 
