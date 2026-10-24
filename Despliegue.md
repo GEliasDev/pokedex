@@ -252,7 +252,28 @@ Sin ese código no se perdió ninguna función de la app, solo se quitó código
 3. Revisar que carguen: listado, imágenes, detalle de un Pokémon y las letras.
 4. Volver a pasar la URL por [securityheaders.com](https://securityheaders.com/) y comprobar que Content-Security-Policy ya salga en verde.
 
-> 📸 Pendiente: captura del resultado después de este paso (`docs/img/02-security-headers-csp.png`).
+#### Resultado del Paso 1
+
+Hicimos `commit` y `push` a `main`, esperamos que el Action terminara y volvimos a analizar la página (con la caché de securityheaders.com limpia):
+
+![Resultado después del CSP: nota A](docs/img/02-security-headers-csp.png)
+
+**La nota subió de C a A.**
+
+| Header | Antes | Ahora |
+|---|---|---|
+| Strict-Transport-Security | ✅ | ✅ |
+| Referrer-Policy | ✅ | ✅ |
+| X-Content-Type-Options | ✅ | ✅ |
+| Content-Security-Policy | ❌ | ✅ **(lo arreglamos en este paso)** |
+| X-Frame-Options | ❌ | ✅ **(se arregló "de regalo")** |
+| Permissions-Policy | ❌ | ❌ (falta) |
+
+**¿Por qué cambiaron dos si solo tocamos uno?** Porque en nuestro CSP pusimos `frame-ancestors 'none'`, que le dice al navegador que nadie puede meter la página en un `iframe`. Eso es exactamente lo que hace X-Frame-Options, y securityheaders.com lo reconoce como equivalente, así que marcó los dos en verde.
+
+**Nota para ser honestos:** `frame-ancestors` es la forma moderna y es la que manda en los navegadores actuales. X-Frame-Options es la versión vieja, que todavía sirven navegadores antiguos. Por ahora la página ya cuenta como protegida, y más adelante podemos decidir si también agregamos el header `X-Frame-Options` clásico por compatibilidad.
+
+**Lo que sigue:** solo falta **Permissions-Policy** para intentar llegar a **A+**.
 
 ## Limpieza (importante)
 
