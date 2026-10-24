@@ -322,7 +322,34 @@ En `src/staticwebapp.config.json`, dentro de `globalHeaders`, al lado del CSP:
 2. `F12` → **Network** → recargar → clic en el documento principal → **Response Headers**: debe aparecer `permissions-policy`.
 3. Pasar la URL por [securityheaders.com](https://securityheaders.com/) con la caché limpia y ver si ya sale **A+**.
 
-> 📸 Pendiente: captura del resultado de este paso (`docs/img/03-security-headers-permissions.png`).
+#### Resultado del Paso 2: ¡A+!
+
+Hicimos `commit` y `push` a `main`, esperamos que el Action terminara y volvimos a analizar la página:
+
+![Resultado final: nota A+](docs/img/03-security-headers-permissions.png)
+
+**Meta cumplida: la nota subió de A a A+**, con los 6 headers en verde.
+
+| Header | Inicial (C) | Después del CSP (A) | Final (A+) |
+|---|---|---|---|
+| Strict-Transport-Security | ✅ | ✅ | ✅ |
+| Referrer-Policy | ✅ | ✅ | ✅ |
+| X-Content-Type-Options | ✅ | ✅ | ✅ |
+| Content-Security-Policy | ❌ | ✅ | ✅ |
+| X-Frame-Options | ❌ | ✅ | ✅ |
+| Permissions-Policy | ❌ | ❌ | ✅ |
+
+**Nota sobre el `'unsafe-inline'` de `style-src`:** me daba miedo que bajara la nota, pero securityheaders.com no lo penalizó. La decisión de dejarlo (por los `<style>` que genera Angular) se mantuvo y la nota igual llegó a A+.
+
+### Resumen del Reto 2
+
+| Paso | Qué hicimos | Archivos tocados | Nota |
+|---|---|---|---|
+| Inicio | Despliegue sin tocar seguridad | — | C |
+| 1 | Content-Security-Policy | `src/staticwebapp.config.json` (nuevo), `angular.json`, `src/index.html` | A |
+| 2 | Permissions-Policy | `src/staticwebapp.config.json` | A+ |
+
+Los headers en Azure Static Web Apps **no se configuran desde el portal**, sino con el archivo `staticwebapp.config.json` que va en el repo. Así los cambios quedan guardados en git y se aplican solos con cada `push`.
 
 ## Limpieza (importante)
 
