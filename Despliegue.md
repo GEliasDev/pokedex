@@ -72,6 +72,8 @@ Pantalla de revisión antes de dar **Crear**:
 
 ![Paso 4: revisar y crear](docs/img/06-azure-revisar-y-crear.png)
 
+> 📝 Ojo: esta captura la tomé **después** de crear el recurso, volviendo a abrir el formulario, porque en el momento no la guardé. Por eso el nombre sale como `swa-pokedex-prod`, pero el recurso real que quedó desplegado se llama `swa-pokedex-portal-prod` (se ve en la siguiente captura). Todo lo demás (grupo de recursos, plan Free, repo `GEliasDev/pokedex`, rama `main`, ubicación de la aplicación `/` y salida `dist/pokedex-angular`) es igual al despliegue real.
+
 Cuando termina, el recurso queda **Listo** en el portal, con la URL pública de la app:
 
 ![Recurso creado en el portal de Azure](docs/img/07-azure-recurso-creado.png)
