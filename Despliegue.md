@@ -275,6 +275,55 @@ Hicimos `commit` y `push` a `main`, esperamos que el Action terminara y volvimos
 
 **Lo que sigue:** solo falta **Permissions-Policy** para intentar llegar a **A+**.
 
+### Paso 2: Permissions-Policy
+
+**¿Qué es?** Es un header que apaga funciones del navegador que la página no necesita (cámara, micrófono, ubicación, pagos, etc.). Aunque alguien lograra meter código raro en la página, o un `iframe` de terceros, no podría activar esas funciones. Es el principio de "mientras menos permisos, mejor".
+
+**Sintaxis:** `funcion=()` significa "nadie puede usar esta función, ni siquiera nuestra propia página". El `()` vacío es la lista de sitios permitidos, y está vacía.
+
+#### Primero: investigar qué usa la app
+
+Buscamos en todo `src/` (archivos `.ts` y `.html`) si el código usa alguna función del navegador que requiera permiso: `geolocation`, `getUserMedia`, `mediaDevices` (cámara/micro), `clipboard`, `Notification`, `requestFullscreen`, `speechSynthesis`, `bluetooth`, `usb`, `vibrate`, `DeviceOrientation`, `<video>` y `<audio>`.
+
+**Resultado: no usa ninguna.** Lo único que salió fueron falsos positivos (la palabra "usb" aparece dentro de `StatusBarComponent`, que es una barra de estado de la app y no tiene nada que ver con USB). La Pokédex solo muestra listas, imágenes y texto, así que podemos apagar todo sin riesgo de romper algo.
+
+#### Lo que agregamos
+
+En `src/staticwebapp.config.json`, dentro de `globalHeaders`, al lado del CSP:
+
+```json
+"Permissions-Policy": "accelerometer=(), autoplay=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()"
+```
+
+| Función apagada | Para qué sirve (en cristiano) |
+|---|---|
+| `accelerometer`, `gyroscope`, `magnetometer` | Sensores de movimiento del celular. |
+| `autoplay` | Reproducir audio/video solo, sin que el usuario toque algo. |
+| `camera`, `microphone` | Cámara y micrófono. |
+| `display-capture` | Grabar o compartir la pantalla. |
+| `geolocation` | Ubicación del usuario. |
+| `midi` | Instrumentos musicales conectados. |
+| `payment` | API de pagos del navegador. |
+| `usb` | Dispositivos USB. |
+
+#### Cambios en el proyecto (archivo por archivo)
+
+- **`src/staticwebapp.config.json`**: se agregó la línea `Permissions-Policy` dentro de `globalHeaders`. Es el **único** archivo de código que cambió. No hubo que tocar `angular.json` porque ese archivo ya se copia al build desde el Paso 1.
+
+#### Decisiones que tomamos
+
+1. **Apagar solo las funciones que existen y son comunes** (las de la tabla), en vez de listar las ~40 que hay. Cubre lo importante y el header se mantiene corto y legible.
+2. **Usar `()` vacío** y no `(self)`, porque la app no usa ninguna de estas funciones ni siquiera por su cuenta. Si más adelante se agrega, por ejemplo, un botón de "compartir ubicación", ahí se cambia esa función a `(self)`.
+3. **Revisar el código primero** antes de apagar nada, para no romper una función que sí se use sin darnos cuenta.
+
+#### Cómo verificar
+
+1. `git push` a `main` y esperar el Action en GitHub.
+2. `F12` → **Network** → recargar → clic en el documento principal → **Response Headers**: debe aparecer `permissions-policy`.
+3. Pasar la URL por [securityheaders.com](https://securityheaders.com/) con la caché limpia y ver si ya sale **A+**.
+
+> 📸 Pendiente: captura del resultado de este paso (`docs/img/03-security-headers-permissions.png`).
+
 ## Limpieza (importante)
 
 Cuando termine la entrega, borra el grupo de recursos `rg-pueblopaletainc-prod` desde el portal para que no quede nada activo.
