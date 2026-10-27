@@ -369,6 +369,35 @@ Hicimos `commit` y `push` a `main`, esperamos que el Action terminara y volvimos
 
 **Nota sobre el `'unsafe-inline'` de `style-src`:** me daba miedo que bajara la nota, pero securityheaders.com no lo penalizó. La decisión de dejarlo (por los `<style>` que genera Angular) se mantuvo y la nota igual llegó a A+.
 
+### Explicación de cada header (para la sustentación)
+
+**1. Strict-Transport-Security (HSTS)**
+Le dice al navegador: "a este sitio entra siempre por HTTPS, nunca por HTTP". Evita que alguien en una wifi pública te intercepte la conexión si escribes la URL sin `https://`. Lo puso Azure por defecto.
+
+**2. Referrer-Policy**
+Cuando haces clic en un link hacia otra página, el navegador le manda a esa página de dónde vienes (el "referrer"). Este header controla cuánto de esa URL se comparte. Sirve para no filtrar rutas internas ni datos que vayan en la URL. Lo puso Azure por defecto.
+
+**3. X-Content-Type-Options** (valor `nosniff`)
+Obliga al navegador a creer lo que el servidor dice que es cada archivo. Sin esto, el navegador podría "adivinar" que una imagen es en realidad un script y ejecutarlo. Lo puso Azure por defecto.
+
+**4. Content-Security-Policy (CSP)**
+Es una lista blanca: de dónde puede cargar la página scripts, imágenes, fuentes y a qué APIs puede conectarse. Si alguien inyecta código malicioso (ataque XSS), el navegador lo bloquea porque no viene de un sitio permitido. Es el más importante y el que más trabajo dio. **Lo agregamos nosotros** (Paso 1).
+
+**5. Permissions-Policy**
+Apaga funciones del navegador que la app no usa: cámara, micrófono, ubicación, pagos, USB, sensores. Así ni un código malicioso ni un `iframe` de terceros podrían activarlas. Es el principio de mínimo privilegio. **Lo agregamos nosotros** (Paso 2).
+
+**6. X-Frame-Options**
+Evita que otra página meta la nuestra dentro de un `iframe`. Protege contra el *clickjacking*: una página falsa pone la nuestra invisible encima de un botón y engaña al usuario para que haga clic. En nuestro caso lo cubre el `frame-ancestors 'none'` del CSP, que es la versión moderna de lo mismo.
+
+| Header | Protege contra | Quién lo puso |
+|---|---|---|
+| Strict-Transport-Security | Conexiones sin cifrar | Azure |
+| Referrer-Policy | Filtrar de dónde vienes | Azure |
+| X-Content-Type-Options | Archivos disfrazados | Azure |
+| Content-Security-Policy | Código malicioso inyectado (XSS) | Nosotros |
+| Permissions-Policy | Uso indebido de cámara, ubicación, etc. | Nosotros |
+| X-Frame-Options | Clickjacking | Nosotros (vía CSP) |
+
 ### Resumen del Reto 2
 
 | Paso | Qué hicimos | Archivos tocados | Nota |
