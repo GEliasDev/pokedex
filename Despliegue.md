@@ -379,6 +379,43 @@ Hicimos `commit` y `push` a `main`, esperamos que el Action terminara y volvimos
 
 Los headers en Azure Static Web Apps **no se configuran desde el portal**, sino con el archivo `staticwebapp.config.json` que va en el repo. Así los cambios quedan guardados en git y se aplican solos con cada `push`.
 
+## Reto 3: 404 al recargar el detalle de un Pokémon
+
+**El problema:** entrando a la app desde el inicio todo funciona, pero si estás en el detalle de un Pokémon (por ejemplo `/pokemon/3`) y recargas la página (`F5`), sale:
+
+```
+404: Not Found
+We couldn't find that page, please check the URL and try again.
+Failed to load resource: the server responded with a status of 404 ()
+```
+
+**La causa:** la app es una *Single Page Application* (SPA). Solo existe **un** archivo real, `index.html`, y Angular decide en el navegador qué pantalla mostrar según la URL. Cuando navegas con los links de la app, Angular cambia la URL sin pedirle nada al servidor, por eso funciona. Pero al recargar, el navegador le pide `/pokemon/3` **a Azure**, y Azure busca un archivo con esa ruta, no lo encuentra y responde 404. (Ese texto de "We couldn't find that page" es la página de error por defecto de Azure, no de nuestra app.)
+
+Esto ya lo habíamos anticipado en el Paso 5b de arriba, y lo dejamos pendiente a propósito en el Reto 2 porque no era parte de la seguridad.
+
+**La solución:** decirle a Azure que, cuando no encuentre un archivo, devuelva `index.html` y deje que Angular resuelva la ruta. Se hace con `navigationFallback` en el mismo `src/staticwebapp.config.json` que ya teníamos:
+
+```json
+"navigationFallback": {
+  "rewrite": "/index.html",
+  "exclude": ["/assets/*", "/*.{css,js,map,json,txt,png,jpg,jpeg,gif,svg,ico,webp,woff,woff2,ttf}"]
+}
+```
+
+- `rewrite`: a dónde manda las rutas que no existen (`/index.html`).
+- `exclude`: rutas que **no** se reescriben. Son archivos reales (imágenes, JS, CSS, fuentes, `/assets/*`). Si no los excluimos y uno falta, Azure devolvería el HTML de la app en lugar de un 404, y el navegador intentaría leerlo como si fuera una imagen o un script (errores raros difíciles de rastrear).
+
+**Cambios en el proyecto (archivo por archivo):**
+
+- `src/staticwebapp.config.json`: se agregó el bloque `navigationFallback`. No hubo que tocar `angular.json`, porque el archivo ya se copia al build desde el Reto 2. Los headers de seguridad (CSP, Permissions-Policy) quedaron igual.
+
+**Decisiones:**
+
+1. **Usar `navigationFallback`** y no una página 404 personalizada: así la recarga funciona en cualquier ruta de la app, y la pantalla de "no encontrado" la sigue manejando Angular.
+2. **Excluir los archivos estáticos**, para que un archivo faltante siga dando 404 de verdad.
+
+**Cómo verificar:** `git push`, esperar el Action en verde, entrar al detalle de un Pokémon, recargar con `F5` y comprobar que se queda en el mismo detalle. También probar pegar directamente la URL `.../pokemon/3` en una pestaña nueva. Y volver a pasar por [securityheaders.com](https://securityheaders.com/) para confirmar que sigue en **A+**.
+
 ## Limpieza (importante)
 
 Cuando termine la entrega, borra el grupo de recursos `rg-pueblopaletainc-prod` desde el portal para que no quede nada activo.
